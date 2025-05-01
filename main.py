@@ -28,30 +28,41 @@ app.add_middleware(
 def root():
     return {"status": "API is live", "docs": "/docs"}
 
-# --- 1. SIMULATE FROM TEXT
+# --- 1. SIMULATE FROM TEXT OR FILE
 @app.post("/simulateFromText")
 async def simulate_from_text(
-    inp_content: str = Form(...),
+    inp_file: UploadFile = File(None),
+    inp_content: str = Form(None),
     simulation_type: str = Form("EPANET"),
     duration: int = Form(24),
     hydraulic_timestep: int = Form(60),
     demand_model: str = Form("PDD"),
     report_status: str = Form("NO")
 ):
-    with tempfile.NamedTemporaryFile(mode="w+", suffix=".inp", delete=False) as f:
-        f.write(inp_content)
-        path = f.name
     try:
+        if inp_file:
+            contents = (await inp_file.read()).decode("utf-8")
+        elif inp_content:
+            contents = inp_content
+        else:
+            return JSONResponse(status_code=400, content={"error": "No input provided."})
+
+        with tempfile.NamedTemporaryFile(mode="w+", suffix=".inp", delete=False) as f:
+            f.write(contents)
+            path = f.name
+
         wn = wntr.network.WaterNetworkModel(path)
         sim = wntr.sim.EpanetSimulator(wn) if simulation_type.upper() == "EPANET" else wntr.sim.WNTRSimulator(wn)
         results = sim.run_sim()
         pressure = results.node["pressure"].mean().to_dict()
         demand = results.node["demand"].mean().to_dict()
         return {"pressure": pressure, "demand": demand}
+
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
     finally:
-        os.remove(path)
+        if os.path.exists(path):
+            os.remove(path)
 
 # --- 2. SIMULATE DISASTER
 class DisasterRequest(BaseModel):
@@ -71,7 +82,6 @@ def simulate_disaster(req: DisasterRequest):
             wn = wntr.morph.split_pipe(wn, req.failure_element)
         elif req.failure_type == "node_closure":
             wn.get_node(req.failure_element).is_isolated = True
-
         sim = wntr.sim.WNTRSimulator(wn)
         results = sim.run_sim()
         pressure = results.node["pressure"].mean().to_dict()
@@ -223,6 +233,14 @@ def ask(req: AskRequest):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
+
+ 
+
+
+
+     
+
+   
 
 
        
