@@ -1,20 +1,14 @@
-# 💧 WNTR-GPT API
+# WNTR GPT Simulation API
 
-A FastAPI-based API for simulating water distribution networks using EPANET/WNTR, designed to work with OpenAI Custom GPT Actions.
+This API simulates water distribution networks using EPANET models with WNTR. It powers the [Custom GPT Assistant](https://chat.openai.com/g/g-681360112e4c8191b104417a2127b025-wntr-analysis-assistant) for hydraulic analysis.
 
 ## 🚀 Features
+- EPANET/WNTR hydraulic simulations
+- Pipe break / node closure modeling
+- Resilience, morphology, economic loss, criticality
+- Network visualization (base64 PNG)
+- GPT-4 interpretations
 
-- Hydraulic & quality simulation from .inp files
-- Disaster/failure modeling
-- Resilience and criticality analysis
-- Economic loss estimation
-- Plotting network structure
-- GPT-4 summaries and insights
-
-## 🛠 Usage
-
-- Run locally: `uvicorn main:app --reload`
-- Deploy with Docker or Render (see `render.yaml`)
-- Connect with GPT using `openapi.yaml`
-
-See `docs/` for GPT setup and test prompts.
+## 🧪 Test Locally
+```bash
+uvicorn main:app --reload
