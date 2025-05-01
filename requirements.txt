@@ -1,10 +1,25 @@
-fastapi
-uvicorn
-pydantic
-pandas
-matplotlib
-wntr>=0.4.1
-openai
-python-multipart
-scipy
-networkx
+# Core web framework
+fastapi>=0.95
+uvicorn[standard]>=0.22
+
+# Hydraulic simulation and modeling
+wntr>=0.4.0
+networkx>=2.5
+scipy>=1.5
+numpy>=1.19
+pandas>=1.1
+
+# Plotting and visualization
+matplotlib>=3.3
+
+# GPT-powered interpretation
+openai>=1.1.0
+
+# Image and file processing
+python-multipart  # Required for UploadFile in FastAPI
+aiofiles          # Optional but good for file handling
+
+# Optional (if graph drawing or GIS support is needed)
+pygraphviz
+geopandas
+
