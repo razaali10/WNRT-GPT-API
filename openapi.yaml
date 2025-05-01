@@ -1,45 +1,65 @@
-openapi: 3.1.0
+openapi: 1.1.0
 info:
   title: WNTR GPT Simulation API
   version: 2.0.0
+
 servers:
-  - url: https://wntr-customgpt.onrender.com
+  - url: https://wnrt-gpt-api.onrender.com
 
 paths:
-
   /simulateFromText:
     post:
       operationId: runSimulationFromText
-      summary: Simulate network using .inp text
+      summary: Simulate a water network from an uploaded .inp file or text content.
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded:
+          multipart/form-data:
             schema:
               type: object
               properties:
+                inp_file:
+                  type: string
+                  format: binary
+                  description: "Upload a .inp file for simulation"
                 inp_content:
                   type: string
+                  description: "Paste .inp file content as text (alternative to file upload)"
                 simulation_type:
                   type: string
                   enum: ["EPANET", "WNTR"]
+                  default: "EPANET"
                 duration:
                   type: integer
+                  default: 24
                 hydraulic_timestep:
                   type: integer
+                  default: 60
                 demand_model:
                   type: string
+                  enum: ["PDD", "CDD"]
+                  default: "PDD"
                 report_status:
                   type: string
                   enum: ["YES", "NO"]
+                  default: "NO"
       responses:
         '200':
-          description: Pressure and demand results
+          description: Simulation results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pressure:
+                    type: object
+                  demand:
+                    type: object
 
   /simulateDisaster:
     post:
       operationId: simulateDisasterScenario
-      summary: Simulate a pipe or node failure scenario
+      summary: Simulate a pipe break or node closure.
       requestBody:
         required: true
         content:
@@ -58,12 +78,21 @@ paths:
                   type: integer
       responses:
         '200':
-          description: Simulation result under failure
+          description: Failure simulation results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pressure:
+                    type: object
+                  demand:
+                    type: object
 
   /simulateWaterQuality:
     post:
       operationId: simulateWaterQuality
-      summary: Simulate water quality (age or trace)
+      summary: Simulate water age or source tracing.
       requestBody:
         required: true
         content:
@@ -82,12 +111,21 @@ paths:
                   type: integer
       responses:
         '200':
-          description: Quality results
+          description: Water quality results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  quality_type:
+                    type: string
+                  result:
+                    type: object
 
   /analyze:
     post:
       operationId: runAdvancedAnalysis
-      summary: Run resilience or morphology analysis
+      summary: Analyze resilience or morphology of a simulated network.
       requestBody:
         required: true
         content:
@@ -97,16 +135,24 @@ paths:
               properties:
                 analysis_type:
                   type: string
+                  enum: ["Resilience", "Morphology"]
                 simulation_results:
                   type: object
       responses:
         '200':
           description: Analysis result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
 
   /economicLoss:
     post:
       operationId: estimateEconomicLoss
-      summary: Estimate economic loss due to demand shortfall
+      summary: Estimate economic impact of demand loss.
       requestBody:
         required: true
         content:
@@ -120,12 +166,21 @@ paths:
                   type: integer
       responses:
         '200':
-          description: Total and per-node economic loss
+          description: Economic loss estimate
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_loss:
+                    type: number
+                  loss_by_node:
+                    type: object
 
   /criticality:
     post:
       operationId: runCriticalityAnalysis
-      summary: Run a criticality analysis on all pipes
+      summary: Analyze criticality of pipes by demand impact.
       requestBody:
         required: true
         content:
@@ -139,12 +194,19 @@ paths:
                   type: string
       responses:
         '200':
-          description: Demand shortfall from each pipe closure
+          description: Pipe-level criticality results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pipe_demand_shortage:
+                    type: object
 
   /plotNetwork:
     post:
       operationId: plotNetwork
-      summary: Generate a base64 PNG of network structure
+      summary: Return base64-encoded network layout image.
       requestBody:
         required: true
         content:
@@ -156,12 +218,19 @@ paths:
                   type: string
       responses:
         '200':
-          description: Encoded PNG image of network layout
+          description: Base64 PNG of the plotted network
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  image_base64:
+                    type: string
 
   /ask:
     post:
       operationId: askGptAssistant
-      summary: Use GPT to summarize or explain results
+      summary: Interpret simulation results using GPT-4.
       requestBody:
         required: true
         content:
@@ -177,4 +246,14 @@ paths:
                   type: string
       responses:
         '200':
-          description: GPT-generated answer
+          description: GPT-generated interpretation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  answer:
+                    type: string
+
+
+
