@@ -1,0 +1,180 @@
+openapi: 3.1.0
+info:
+  title: WNTR GPT Simulation API
+  version: 2.0.0
+servers:
+  - url: https://wntr-customgpt.onrender.com
+
+paths:
+
+  /simulateFromText:
+    post:
+      operationId: runSimulationFromText
+      summary: Simulate network using .inp text
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                inp_content:
+                  type: string
+                simulation_type:
+                  type: string
+                  enum: ["EPANET", "WNTR"]
+                duration:
+                  type: integer
+                hydraulic_timestep:
+                  type: integer
+                demand_model:
+                  type: string
+                report_status:
+                  type: string
+                  enum: ["YES", "NO"]
+      responses:
+        '200':
+          description: Pressure and demand results
+
+  /simulateDisaster:
+    post:
+      operationId: simulateDisasterScenario
+      summary: Simulate a pipe or node failure scenario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inp_content:
+                  type: string
+                failure_element:
+                  type: string
+                failure_type:
+                  type: string
+                  enum: ["pipe_break", "node_closure"]
+                simulation_hours:
+                  type: integer
+      responses:
+        '200':
+          description: Simulation result under failure
+
+  /simulateWaterQuality:
+    post:
+      operationId: simulateWaterQuality
+      summary: Simulate water quality (age or trace)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inp_content:
+                  type: string
+                quality_type:
+                  type: string
+                  enum: ["age", "trace"]
+                trace_node:
+                  type: string
+                duration:
+                  type: integer
+      responses:
+        '200':
+          description: Quality results
+
+  /analyze:
+    post:
+      operationId: runAdvancedAnalysis
+      summary: Run resilience or morphology analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                analysis_type:
+                  type: string
+                simulation_results:
+                  type: object
+      responses:
+        '200':
+          description: Analysis result
+
+  /economicLoss:
+    post:
+      operationId: estimateEconomicLoss
+      summary: Estimate economic loss due to demand shortfall
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inp_content:
+                  type: string
+                duration:
+                  type: integer
+      responses:
+        '200':
+          description: Total and per-node economic loss
+
+  /criticality:
+    post:
+      operationId: runCriticalityAnalysis
+      summary: Run a criticality analysis on all pipes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inp_content:
+                  type: string
+                scenario_type:
+                  type: string
+      responses:
+        '200':
+          description: Demand shortfall from each pipe closure
+
+  /plotNetwork:
+    post:
+      operationId: plotNetwork
+      summary: Generate a base64 PNG of network structure
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                inp_content:
+                  type: string
+      responses:
+        '200':
+          description: Encoded PNG image of network layout
+
+  /ask:
+    post:
+      operationId: askGptAssistant
+      summary: Use GPT to summarize or explain results
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_question:
+                  type: string
+                pressure_summary:
+                  type: string
+                demand_summary:
+                  type: string
+      responses:
+        '200':
+          description: GPT-generated answer

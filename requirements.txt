@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+pandas
+matplotlib
+wntr>=0.4.1
+openai
+python-multipart
+scipy
+networkx
