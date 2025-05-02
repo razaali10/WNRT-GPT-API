@@ -234,15 +234,35 @@ def ask(req: AskRequest):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
- 
+@app.post("/simulateFromTextJson")
+async def simulate_from_text_json(payload: dict):
+    try:
+        inp_content = payload.get("inp_content")
+        simulation_type = payload.get("simulation_type", "EPANET")
 
+        if not inp_content:
+            return JSONResponse(status_code=400, content={"error": "inp_content must be provided in the JSON body."})
 
+        # Write inp content to a temporary file
+        with NamedTemporaryFile(delete=False, suffix=".inp", mode='w') as tmp:
+            tmp.write(inp_content)
+            tmp_path = tmp.name
 
-     
+        wn = wntr.network.WaterNetworkModel(tmp_path)
 
-   
+        if simulation_type == "EPANET":
+            sim = wntr.sim.EpanetSimulator(wn)
+        else:
+            sim = wntr.sim.WNTRSimulator(wn)
 
+        results = sim.run_sim()
+        pressure = results.node["pressure"].mean().to_dict()
+        demand = results.node["demand"].mean().to_dict()
 
-       
+        return {"pressure": pressure, "demand": demand}
 
-
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+    finally:
+        if 'tmp_path' in locals() and os.path.exists(tmp_path):
+            os.remove(tmp_path)
