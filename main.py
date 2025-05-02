@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import wntr
 import tempfile
+from tempfile import NamedTemporaryFile
 import pandas as pd
 import openai
 import matplotlib.pyplot as plt
